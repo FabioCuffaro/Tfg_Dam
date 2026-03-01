@@ -31,16 +31,26 @@ public class JwtUtil {
      * Ahora mismo es una clave que he creado yo, pero luego cuando se despliegue tendre que cambiarlo y poner
      * una variable de entorno, pero para hacer pruebas funciona ahora mismo
      */
-    @Value("${jwt.secret}")
-    private static String secret;
+    private final String secret;
 
     /**
      * Tiempo de vida del token en milisegundos.
      * Spring lee este valor de application.properties (jwt.expiration).
      * 86400000 ms = 24 horas, como he definido en los requisitos no funcionales.
      */
-    @Value("${jwt.expiration}")
-    private Long expiration;
+    private final Long expiration;
+
+    // Inyección por constructor en lugar de @Value en campo
+    // Esto garantiza que los valores están disponibles
+    // en el momento en que Spring crea el bean
+    public JwtUtil(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration}") Long expiration) {
+        this.secret = secret;
+        this.expiration = expiration;
+    }
+
+
 
     //==============================================
     // MÉTODO 1: Generar token
@@ -65,7 +75,7 @@ public class JwtUtil {
                 .setSubject(email)                          // quién es el usuario
                 .setIssuedAt(new Date())                    // cuándo se ha creado
                 .setExpiration(new Date(System.currentTimeMillis() + expiration)) // cuándo expira Y LO TENGO QUE PONER EN MILISEGUNDOS
-                .signWith(getSigningKey(), SignatureAlgorithm.ES256) // firma con nuestra clave
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // firma con nuestra clave
                 .compact();                                 // construye el String final
     }
 
