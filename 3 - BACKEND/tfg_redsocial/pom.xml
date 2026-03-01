@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<!-- 3.4.5 es estable, compatible con Java 17 y todas las dependencias -->
+		<version>3.4.5</version>
+		<relativePath/>
+	</parent>
+
+	<groupId>com.tfg</groupId>
+	<artifactId>tfg_redsocial</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>tfg_redsocial</name>
+	<description>Trabajo Fin de Grado - Red Social</description>
+
+	<properties>
+		<java.version>17</java.version>
+	</properties>
+
+	<dependencies>
+
+		<!-- ================================================ -->
+		<!-- NÚCLEO: Web, JPA, Security                       -->
+		<!-- ================================================ -->
+
+		<!-- spring-boot-starter-web (NO webmvc, eso no existe) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- ================================================ -->
+		<!-- VALIDACIÓN: activa @NotBlank, @Email, @Size...   -->
+		<!-- en los DTOs. Sin esto las anotaciones no hacen   -->
+		<!-- nada aunque estén escritas.                      -->
+		<!-- ================================================ -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
+		<!-- ================================================ -->
+		<!-- BASE DE DATOS                                    -->
+		<!-- ================================================ -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- ================================================ -->
+		<!-- UTILIDADES                                       -->
+		<!-- ================================================ -->
+
+		<!-- DevTools: recarga el servidor al guardar         -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- Lombok: genera getters, setters, builders...     -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- ================================================ -->
+		<!-- JWT - Librería JJWT (3 artefactos necesarios)   -->
+		<!--                                                  -->
+		<!-- jjwt-api  → interfaces y clases públicas        -->
+		<!-- jjwt-impl → implementación real (solo runtime)   -->
+		<!-- jjwt-jackson → serializa el payload a JSON      -->
+		<!-- ================================================ -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- ================================================ -->
+		<!-- TESTING                                          -->
+		<!-- spring-boot-starter-test incluye JUnit 5,        -->
+		<!-- Básicamente lo necesario para tests           -->
+		<!-- ================================================ -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Lombok como annotation processor para que Maven -->
+			<!-- genere los métodos en tiempo de compilación     -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<!-- Sin esto Maven no sabe que JAR usar, me daba problemas al empezar a compilar -->
+							<!-- el procesador y Lombok no generaban nada -->
+							<version>${lombok.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

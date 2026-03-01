@@ -1,0 +1,64 @@
+<!-- ========================================== -->
+<!-- LOGIN.HTML   Inicio de sesión sencillo  -->
+<!-- ========================================== -->
+
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión - Red Social TFG</title>
+  <link rel="stylesheet" href="css/login_register.css">
+</head>
+
+<body>
+
+  <!-- Creo container para saber dónde ponerlo y adaptar tamaño y padding -->
+  <div class="container">
+
+    <!-- Creo card para diseñar el interior y que no haya errores si muevo el containter -->
+    <div class="card">
+
+      <h1>Bienvenido de nuevo!</h1>
+      <p class="subtitle">Inicia sesión para continuar</p>
+
+      <form id="loginForm">
+        
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required placeholder="tu@email.com">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" name="password" required placeholder="••••••">
+        </div>
+
+
+        <!-- Mensaje oculto por si no carga el servidor-->
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+        <!-- Botón para iniciar sesión con carga al pulsar jscript-->
+        <button type="submit" class="btn-primary" id="loginBtn">
+          <span class="btn-text">Iniciar Sesión</span>
+          <span class="btn-loader" style="display: none;">⏳</span>
+        </button>
+
+      </form>
+
+      <p class="link">
+        ¿No tienes cuenta? <a href="register.html">Regístrate aquí</a>
+
+      </p>
+
+    </div>
+
+  </div>
+
+  <script src="js/login.js"></script>
+
+</body>
+
+</html>
