@@ -1,0 +1,230 @@
+/* ==========================================
+           VARIABLES DE COLOR
+           Los mismos colores definidos en la memoria:
+           #000000 Black, #999999 Gray, #6576B8 Blue,
+           #71509C Purple, #FFFFFF White
+        ========================================== */
+        :root {
+            --black:  #000000;
+            --gray:   #999999;
+            --blue:   #6576B8;
+            --purple: #71509C;
+            --white:  #FFFFFF;
+            --gradient: linear-gradient(140deg, #667eea, #764ba2);
+            --error: #e74c3c;
+            --success: #2ecc71;
+        }
+
+        /* ==========================================
+           RESET Y BASE
+           Sistema tipográfico adaptable a cada sistema
+           operativo, como se explica en la memoria
+        ========================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* Tipografía del sistema según dispositivo:
+               Windows → Segoe UI
+               Mac     → -apple-system
+               Android → Roboto
+               Linux   → Ubuntu */
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                         Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ==========================================
+           TARJETA DEL FORMULARIO
+        ========================================== */
+        .card {
+            background: var(--white);
+            padding: 2.5rem 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(100px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--black);
+            margin-bottom: 0.3rem;
+        }
+
+        .card p.subtitle {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 1.8rem;
+        }
+
+        /* ==========================================
+           CAMPOS DEL FORMULARIO
+        ========================================== */
+        .field {
+            margin-bottom: 1.2rem;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--black);
+            margin-bottom: 0.4rem;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 0.65rem 0.8rem;
+            border: 1.5px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .field input:focus {
+            border-color: var(--blue);
+        }
+
+        /* Estado de error en el campo */
+        .field input.error {
+            border-color: var(--error);
+        }
+
+        .field .field-error {
+            font-size: 0.75rem;
+            color: var(--error);
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .field .field-error.visible {
+            display: block;
+        }
+
+        /* ==========================================
+           BOTÓN PRINCIPAL
+        ========================================== */
+        .btn-primary {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--blue);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.5s ease;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+        }
+
+    
+
+        /* Estado cargando del botón */
+        .btn-primary:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+        }
+
+        /* ==========================================
+           BARRA DE CARGA (como en la memoria, página 19)
+        ========================================== */
+        .loading-bar {
+            width: 100%;
+            height: 3px;
+            background: #eee;
+            border-radius: 2px;
+            margin-top: 0.8rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .loading-bar.visible {
+            display: block; /*Ocupa toda la linea al hacerse visible*/
+        }
+
+        .loading-bar-inner {
+            height: 100%;
+            width: 0%;
+            background: var(--blue);
+            border-radius: 2px;
+            animation: loading 1.5s ease-in-out infinite;
+        }
+
+        @keyframes loading {
+            0%   { width: 0%;   margin-left: 0%; }
+            50%  { width: 60%;  margin-left: 20%; }
+            100% { width: 0%;   margin-left: 100%; }
+        }
+
+        /* ==========================================
+           MENSAJE DE ERROR GLOBAL (credenciales erróneas)
+        ========================================== */
+        .alert {
+            padding: 0.7rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert.error {
+            background: #fdecea;
+            color: var(--error);
+            border-left: 3px solid var(--error);
+            display: block;
+        }
+
+        /* ==========================================
+           ENLACE DE REGISTRO
+        ========================================== */
+        .link-row {
+            text-align: center;
+            margin-top: 1.2rem;
+            font-size: 0.82rem;
+            color: var(--gray);
+        }
+
+        .link-row a {
+            color: var(--blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .link-row a:hover {
+            color: var(--purple);
+            text-decoration: underline;
+        }
+
+        /* ==========================================
+           RESPONSIVE: móvil
+        ========================================== */
+        @media (max-width: 420px) {
+            .card {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+            }
+        }
