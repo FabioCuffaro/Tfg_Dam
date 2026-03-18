@@ -82,6 +82,19 @@
 			<optional>true</optional>
 		</dependency>
 
+
+		<!-- ================================================ -->
+		<!-- CLOUDINARY - SDK para subir imágenes             -->
+		<!--                                                  -->
+		<!-- cloudinary-http44 usa Apache HttpClient 4.4     -->
+		<!-- compatible con Spring Boot 3.x sin conflictos   -->
+		<!-- ================================================ -->
+		<dependency>
+			<groupId>com.cloudinary</groupId>
+			<artifactId>cloudinary-http44</artifactId>
+			<version>1.38.0</version>
+		</dependency>
+
 		<!-- ================================================ -->
 		<!-- JWT - Librería JJWT (3 artefactos necesarios)   -->
 		<!--                                                  -->

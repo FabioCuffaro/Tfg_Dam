@@ -13,6 +13,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     // Feed global paginado (Voy a poner máximo unos 20 posts por página)
     // JOIN FETCH para cargar el perfil del autor en la misma query → evita el problema N+1
+    // ⭐ CRITICO: Sin esto: 1 query por post + 1 por usuario = 21 queries si hay 20 posts
+    //Con esto: 1 sola query trae posts + usuarios + profiles
     @Query("SELECT p FROM Post p JOIN FETCH p.user u JOIN FETCH u.profile ORDER BY p.createdAt DESC")
     Page<Post> findAllWithAuthor(Pageable pageable);
 
