@@ -89,6 +89,10 @@ public class SecurityConfig {
                         // IMPORTANTE: eliminar o proteger antes del despliegue en producción
                         .requestMatchers("/test/**").permitAll()
 
+                        // GET públicos: cualquiera puede ver sin token
+                        .requestMatchers( "/api/posts/**").permitAll()
+                        .requestMatchers("/api/profiles/**").permitAll()
+
                         // Cualquier otra ruta requiere estar autenticado (tener token válido)
                         .anyRequest().authenticated()
                 )

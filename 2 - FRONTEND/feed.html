@@ -1,0 +1,106 @@
+<!-- ========================================== -->
+<!-- FEED.HTML - Feed principal de Prometeo    -->
+<!-- ========================================== -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feed - Prometeo</title>
+  <link rel="stylesheet" href="css/feed.css">
+</head>
+<body>
+
+  <!-- Navbar fija arriba -->
+  <nav class="navbar">
+    <div class="nav-inner">
+
+      <!-- Logo con el mismo gradiente del login -->
+      <a href="feed.html" class="nav-logo">
+        <span class="logo-icon">P</span>
+        <span class="logo-text">PROMETEO</span>
+      </a>
+
+      <!-- Buscador de usuarios -->
+      <div class="nav-search">
+        <input type="text" id="searchInput" placeholder="Buscar usuarios..." autocomplete="off">
+        <!-- Dropdown con resultados -->
+        <div class="search-results" id="searchResults"></div>
+      </div>
+
+      <!-- Usuario logueado y logout -->
+      <div class="nav-actions">
+        <a href="profile.html" class="nav-profile">
+          <!-- La inicial y nombre se rellenan con JS -->
+          <div class="nav-avatar" id="navAvatar">P</div>
+          <span class="nav-username" id="navUsername">@Prometeo</span>
+        </a>
+        <button class="btn-logout" id="logoutBtn">Salir</button>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- Columna central con todo el contenido -->
+  <main class="main-layout">
+
+    <!-- Caja para escribir un nuevo post -->
+    <div class="composer">
+      <div class="composer-top">
+        <!-- Avatar del usuario logueado -->
+        <div class="composer-avatar" id="composerAvatar">F</div>
+        <!-- Textarea donde escribes el post -->
+        <textarea
+          id="postContent"
+          class="composer-input"
+          placeholder="¿Qué estás construyendo hoy?"
+          maxlength="500"
+          rows="2"
+        ></textarea>
+      </div>
+
+      <!-- Preview de imagen seleccionada (oculto por defecto) -->
+      <div class="image-preview-container" id="imagePreviewContainer" style="display: none;">
+        <img id="imagePreviewImg" src="" alt="preview" class="image-preview-thumb">
+        <button class="image-preview-remove" id="removeImageBtn" title="Quitar imagen">✕</button>
+      </div>
+
+      <div class="composer-footer">
+        <!-- Input file oculto (se activa con el botón 📎) -->
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+
+        <!-- Botón adjuntar imagen -->
+        <button class="btn-attach" id="attachBtn" title="Adjuntar imagen">
+          📎
+        </button>
+
+        <!-- Contador de caracteres -->
+        <span class="char-counter" id="charCounter">0 / 500</span>
+        <!-- Botón publicar: desactivado hasta que escribas algo -->
+        <button class="btn-publish" id="publishBtn" disabled>
+          <span class="btn-text">Publicar</span>
+          <span class="btn-loader" style="display: none;">⏳</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista de posts: se rellena con JS -->
+    <!-- Mientras carga se ven los skeletons grises -->
+    <div id="postsList">
+      <div class="skeleton-post"></div>
+      <div class="skeleton-post"></div>
+      <div class="skeleton-post"></div>
+    </div>
+
+  </main>
+
+  <!-- Lightbox para ver imágenes a pantalla completa -->
+  <div class="lightbox-overlay" id="lightboxOverlay">
+    <button class="lightbox-close" id="lightboxClose">✕</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="imagen completa">
+  </div>
+
+  <script src="js/feed.js"></script>
+</body>
+</html>

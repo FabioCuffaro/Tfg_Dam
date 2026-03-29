@@ -3,8 +3,7 @@
         // Si ya está logueado, redirigir al feed directamente
         window.addEventListener('load', () => {
             if (localStorage.getItem('token')) {
-                window.location.href = '/feed.html'; //aún no existe, 
-                                                    // pero cuando exista irá al feed
+                window.location.href = '/feed.html';
             }
         });
 
