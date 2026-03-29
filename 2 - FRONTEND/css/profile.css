@@ -1,0 +1,465 @@
+/* ==========================================
+   profile.css - Estilos de la página de perfil
+   Se carga junto a feed.css
+   ========================================== */
+
+/* ==========================================
+   LAYOUT DEL PERFIL
+   ========================================== */
+
+.profile-main {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 30px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ==========================================
+   CABECERA DEL PERFIL
+   ========================================== */
+
+.profile-header-card {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Fila superior: avatar + botón de acción */
+.profile-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+/* Avatar grande */
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Botón editar perfil (propio) — igual que btn-primary */
+.btn-edit-profile {
+  padding: 10px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #333;
+  transition: border-color 0.3s, color 0.3s;
+}
+
+.btn-edit-profile:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+/* Botón seguir (perfil ajeno) */
+.btn-follow {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-follow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Estado: ya sigue */
+.btn-follow.following {
+  background: none;
+  border: 2px solid #e0e0e0;
+  color: #999;
+}
+
+.btn-follow.following:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ==========================================
+   INFORMACIÓN DEL USUARIO
+   ========================================== */
+
+.profile-display-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.profile-username {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 12px;
+}
+
+.profile-bio {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 14px;
+  white-space: pre-wrap;
+}
+
+/* Ubicación y web */
+.profile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.profile-meta-item {
+  font-size: 13px;
+  color: #999;
+}
+
+.profile-website {
+  color: #667eea;
+}
+
+.profile-website:hover {
+  text-decoration: underline;
+}
+
+/* Estadísticas */
+.profile-stats {
+  display: flex;
+  gap: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  /* Mismo truco del gradiente en texto */
+  background: linear-gradient(220deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #999;
+  font-weight: 600;
+}
+
+/* ==========================================
+   SECCIÓN DE POSTS DEL PERFIL
+   ========================================== */
+
+.profile-posts-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding-top: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ==========================================
+   MODAL DE EDICIÓN DE PERFIL
+   ========================================== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-header h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #333;
+}
+
+.modal-close {
+  font-size: 18px;
+  color: #999;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s;
+}
+
+.modal-close:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Reutilizamos el mismo form-group del login */
+.modal-body .form-group label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.modal-body .form-group input,
+.modal-body .form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.3s;
+  outline: none;
+  resize: vertical;
+}
+
+.modal-body .form-group input:focus,
+.modal-body .form-group textarea:focus {
+  border-color: #667eea;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btn-cancel {
+  padding: 10px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #666;
+  transition: border-color 0.3s;
+}
+
+.btn-cancel:hover {
+  border-color: #999;
+}
+
+/* Botón guardar — igual que btn-primary del login */
+.btn-save {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* ==========================================
+   STATS CLICABLES (seguidores / siguiendo)
+   ========================================== */
+
+/* Cambia el cursor y añade un subrayado sutil al número al pasar el ratón */
+.stat-clickable {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 4px 8px;
+  transition: background 0.2s;
+}
+
+.stat-clickable:hover {
+  background: rgba(102, 126, 234, 0.07);
+}
+
+.stat-clickable:hover .stat-number {
+  text-decoration: underline;
+  text-decoration-color: #667eea;
+}
+
+/* ==========================================
+   MODAL DE LISTA DE SEGUIDORES / SIGUIENDO
+   ========================================== */
+
+/* El cuerpo del modal tiene scroll cuando hay muchos usuarios */
+.follow-list-body {
+  padding: 0 24px 8px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+/* Cada fila de usuario en la lista */
+.follow-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.follow-list-item:last-child {
+  border-bottom: none;
+}
+
+.follow-list-item:hover {
+  background: #f9f9f9;
+  margin: 0 -8px;
+  padding: 12px 8px;
+}
+
+/* Avatar pequeño dentro de la lista */
+.follow-list-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.follow-list-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.follow-list-info {
+  flex: 1;
+  min-width: 0; /* evita overflow de texto */
+}
+
+.follow-list-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.follow-list-username {
+  font-size: 13px;
+  color: #999;
+  margin-top: 1px;
+}
+
+/* Estado vacío dentro del modal */
+.follow-list-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-size: 14px;
+}
+
+.follow-list-empty-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+/* Skeletons de carga dentro del modal */
+.follow-list-skeleton {
+  height: 54px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  margin: 10px 0;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 640px) {
+  .profile-main { padding: 16px; }
+  .profile-avatar { width: 64px; height: 64px; font-size: 24px; }
+  .profile-stats { gap: 16px; }
+  .follow-list-body { max-height: 320px; }
+}

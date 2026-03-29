@@ -1,0 +1,159 @@
+<!-- ========================================== -->
+<!-- PROFILE.HTML - Página de perfil          -->
+<!-- ========================================== -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil - Prometeo</title>
+  <link rel="stylesheet" href="css/feed.css">
+  <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+
+  <!-- Navbar: igual que en feed.html -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="feed.html" class="nav-logo">
+        <span class="logo-icon">P</span>
+        <span class="logo-text">PROMETEO</span>
+      </a>
+      <div class="nav-search">
+        <input type="text" id="searchInput" placeholder="Buscar usuarios..." autocomplete="off">
+        <div class="search-results" id="searchResults"></div>
+      </div>
+      <div class="nav-actions">
+        <a href="profile.html" class="nav-profile">
+          <div class="nav-avatar" id="navAvatar">F</div>
+          <span class="nav-username" id="navUsername">@fabio</span>
+        </a>
+        <button class="btn-logout" id="logoutBtn">Salir</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="profile-main">
+
+    <!-- Tarjeta de cabecera del perfil -->
+    <div class="profile-header-card">
+
+      <!-- Fila superior: avatar grande + botón de acción -->
+      <div class="profile-header-top">
+        <!-- Avatar: inicial si no hay foto, imagen si la tiene -->
+        <div class="profile-avatar" id="profileAvatar">F</div>
+
+        <!-- Botón editar (si es tu perfil) o seguir (si es ajeno) -->
+        <!-- Se muestran/ocultan con JS según quién sea el usuario -->
+        <button class="btn-edit-profile" id="editProfileBtn" style="display: none;">
+          Editar perfil
+        </button>
+        <button class="btn-follow" id="followBtn" style="display: none;">
+          Seguir
+        </button>
+      </div>
+
+      <!-- Datos del usuario -->
+      <h1 class="profile-display-name" id="profileDisplayName">Fabio Cuffaro</h1>
+      <p class="profile-username" id="profileUsername">@fabio</p>
+      <p class="profile-bio" id="profileBio"></p>
+
+      <!-- Ubicación y web (opcionales) -->
+      <div class="profile-meta">
+        <span class="profile-meta-item" id="profileLocation" style="display: none;"></span>
+        <a class="profile-meta-item profile-website" id="profileWebsite" href="#" target="_blank" style="display: none;"></a>
+      </div>
+
+      <!-- Estadísticas: posts, seguidores, siguiendo -->
+      <!-- Seguidores y Siguiendo son clicables: abren el modal con la lista -->
+      <div class="profile-stats">
+        <div class="stat">
+          <span class="stat-number" id="statPosts">0</span>
+          <span class="stat-label">Posts</span>
+        </div>
+        <div class="stat stat-clickable" id="statFollowersBtn" title="Ver seguidores">
+          <span class="stat-number" id="statFollowers">0</span>
+          <span class="stat-label">Seguidores</span>
+        </div>
+        <div class="stat stat-clickable" id="statFollowingBtn" title="Ver siguiendo">
+          <span class="stat-number" id="statFollowing">0</span>
+          <span class="stat-label">Siguiendo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Posts del usuario -->
+    <div class="profile-posts-section">
+      <p class="section-title">Posts</p>
+      <div id="profilePostsList">
+        <div class="skeleton-post"></div>
+        <div class="skeleton-post"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal para editar el perfil -->
+  <div class="modal-overlay" id="editModal" style="display: none;">
+    <div class="modal">
+
+      <div class="modal-header">
+        <h3>Editar perfil</h3>
+        <button class="modal-close" id="closeEditModal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="editDisplayName">Nombre para mostrar</label>
+          <input type="text" id="editDisplayName" maxlength="100">
+        </div>
+        <div class="form-group">
+          <label for="editBio">Biografía</label>
+          <textarea id="editBio" maxlength="300" rows="3" placeholder="Cuéntanos algo sobre ti..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="editLocation">Ubicación</label>
+          <input type="text" id="editLocation" maxlength="100" placeholder="Ciudad, País">
+        </div>
+        <div class="form-group">
+          <label for="editWebsite">Sitio web</label>
+          <input type="url" id="editWebsite" maxlength="200" placeholder="https://...">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" id="cancelEdit">Cancelar</button>
+        <button class="btn-save" id="saveEdit">Guardar cambios</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal para ver seguidores / siguiendo -->
+  <!-- El título y la lista se rellenan dinámicamente con JS -->
+  <div class="modal-overlay" id="followListModal" style="display: none;">
+    <div class="modal">
+
+      <div class="modal-header">
+        <!-- "Seguidores de @fabio" o "Siguiendo @fabio" -->
+        <h3 id="followListTitle">Seguidores</h3>
+        <button class="modal-close" id="closeFollowListModal">✕</button>
+      </div>
+
+      <!-- Lista de usuarios: se rellena con JS -->
+      <!-- Mientras carga se muestra el skeleton -->
+      <div class="modal-body follow-list-body" id="followListBody">
+        <div class="follow-list-skeleton"></div>
+        <div class="follow-list-skeleton"></div>
+        <div class="follow-list-skeleton"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Cargamos feed.js primero porque profile.js usa funciones de ahí -->
+  <script src="js/feed.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>
