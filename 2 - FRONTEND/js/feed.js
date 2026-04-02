@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initUserInfo();
     initComposer();
     loadFeed(0);
+    initInfiniteScroll() //Nuevo para poder hacer scroll infinto
     initSearch();
     initLogout();
     initLightbox();
@@ -46,6 +47,88 @@ function setAvatar(elementId, initial, avatarUrl) {
     } else {
         el.textContent = initial;
     }
+}
+
+// ==========================================
+// BUSCADOR (conectado al backend)
+// ==========================================
+
+function initSearch() {
+    const input   = document.getElementById('searchInput');
+    const results = document.getElementById('searchResults');
+    let debounceTimer;
+
+    input.addEventListener('input', function () {
+        const query = input.value.trim();
+        clearTimeout(debounceTimer);
+
+        if (query.length < 2) {
+            results.classList.remove('visible');
+            return;
+        }
+
+        debounceTimer = setTimeout(function () { searchUsers(query); }, 300);
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.nav-search')) {
+            results.classList.remove('visible');
+        }
+    });
+}
+
+async function searchUsers(query) {
+    const results = document.getElementById('searchResults');
+
+    try {
+        const response = await fetch(API_URL + '/profiles/search?q=' + encodeURIComponent(query), {
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+        });
+
+        if (!response.ok) return;
+
+        const users = await response.json();
+
+        if (users.length === 0) {
+            results.classList.remove('visible');
+            return;
+        }
+
+        results.innerHTML = users.map(function (u) {
+            const initial = (u.displayName || u.username || 'U').charAt(0).toUpperCase();
+            return (
+                '<div class="search-result-item" onclick="goToProfile(\'' + u.username + '\')">' +
+                    '<div class="search-result-avatar">' + initial + '</div>' +
+                    '<div>' +
+                        '<p class="search-result-name">' + escapeHTML(u.displayName || u.username) + '</p>' +
+                        '<p class="search-result-username">@' + escapeHTML(u.username) + '</p>' +
+                    '</div>' +
+                '</div>'
+            );
+        }).join('');
+
+        results.classList.add('visible');
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
+function initLogout() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function () {
+            if (confirm('¿Cerrar sesión?')) logout();
+        });
+    }
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
 }
 
 // ==========================================
@@ -176,52 +259,68 @@ async function handlePublish() {
 // ==========================================
 
 let currentPage = 0;
-let isLoading   = false;
+let isLoading   = false; //Evita lanzar dos fetch a la vez
+let hasMore = true; //Nueva variable para ver si hay más paginas para cargar 
 
 async function loadFeed(page) {
-    if (isLoading) return;
-    isLoading = true;
 
-    const postsList = document.getElementById('postsList');
+  // Guard 1: no lanzar una petición si ya hay otra en vuelo
+  if (isLoading) return;
 
-    try {
-        const response = await fetch(API_URL + '/posts?page=' + page, {
-            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-        });
+  // Guard 2: no pedir más si el backend ya dijo que es la última página
+  if (!hasMore && page !== 0) return;
 
-        if (response.status === 401) { logout(); return; }
+  isLoading = true;
+  const postsList = document.getElementById('postsList');
 
-        const data = await response.json();
+  try {
+    const response = await fetch(API_URL + '/posts?page=' + page, {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
 
-        // Primera carga: limpiar skeletons
-        if (page === 0) {
-            postsList.innerHTML = '';
-        }
+    if (response.status === 401) { logout(); return; }
 
-        if (data.content && data.content.length === 0 && page === 0) {
-            postsList.innerHTML =
-                '<div class="empty-state">' +
-                    '<div class="empty-state-icon">📭</div>' +
-                    '<p class="empty-state-title">El feed está vacío</p>' +
-                    '<p class="empty-state-text">¡Sé el primero en publicar algo!</p>' +
-                '</div>';
-            return;
-        }
+    const data = await response.json();
 
-        if (data.content) {
-            data.content.forEach(function (post) { addPostToBottom(post); });
-        }
-
-        currentPage = page;
-
-    } catch (err) {
-        if (page === 0) {
-            postsList.innerHTML = '<div class="empty-state"><p class="empty-state-title">Error al cargar el feed</p><p class="empty-state-text">Comprueba tu conexión con el servidor.</p></div>';
-        }
-        console.error(err);
-    } finally {
-        isLoading = false;
+    // Primera página: limpiar skeletons/estado vacío anterior
+    if (page === 0) {
+      postsList.innerHTML = '';
+      // Reiniciar el estado por si el usuario recargó sin recargar la página
+      hasMore = true;
     }
+
+    // Estado vacío total (primer fetch, sin resultados)
+    if (data.content && data.content.length === 0 && page === 0) {
+      postsList.innerHTML =
+        '<div class="empty-state">' +
+          '<div class="empty-state-icon">📭</div>' +
+          '<p class="empty-state-title">El feed está vacío</p>' +
+          '<p class="empty-state-text">¡Sé el primero en publicar algo!</p>' +
+        '</div>';
+      hasMore = false;
+      return;
+    }
+
+    // Añadir los posts al DOM (sin borrar los ya cargados)
+    if (data.content) {
+      data.content.forEach(function (post) { addPostToBottom(post); });
+    }
+
+    // ── ACTUALIZAR ESTADO DE PAGINACIÓN ─────────────────────────────
+    // data.number → página real confirmada por el servidor
+    // data.last   → true si ya no hay más páginas
+    currentPage = data.number;
+    hasMore     = !data.last;   // ← NUEVO
+
+  } catch (err) {
+    if (page === 0) {
+      postsList.innerHTML = '<div class="empty-state">No se puede comunicar con el servidor, pruebe más tarde </div>';
+    }
+    console.error(err);
+  } finally {
+    // Siempre liberar el semáforo, aunque haya error
+    isLoading = false;
+  }
 }
 
 function addPostToTop(post) {
@@ -323,14 +422,14 @@ function attachPostEvents(postId) {
 // ==========================================
 
 async function handleLike(postId, btn) {
-    const isLiked  = btn.classList.contains('liked');
-    const countEl  = btn.querySelector('.like-count');
-    const heart    = btn.querySelector('svg');
-    const count    = parseInt(countEl.textContent);
+    const isLiked = btn.classList.contains('liked');
+    const countEl = btn.querySelector('.like-count');
+    const heart   = btn.querySelector('svg');
+    const count   = parseInt(countEl.textContent) || 0;
 
-    // Actualizar UI inmediatamente (optimistic update)
+    // Optimistic update
     btn.classList.toggle('liked');
-    heart.setAttribute('fill', isLiked ? 'none' : 'currentColor');
+    if (heart) heart.setAttribute('fill', isLiked ? 'none' : 'currentColor');
     countEl.textContent = isLiked ? count - 1 : count + 1;
 
     try {
@@ -339,16 +438,21 @@ async function handleLike(postId, btn) {
             headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
         });
 
-        if (!response.ok) {
+        if (response.ok) {
+            // Usar el valor real del servidor en lugar del optimista
+            const updated = await response.json();
+            countEl.textContent = updated.likeCount;
+            if (heart) heart.setAttribute('fill', updated.likedByCurrentUser ? 'currentColor' : 'none');
+            btn.classList.toggle('liked', updated.likedByCurrentUser);
+        } else {
             // Revertir si falla
             btn.classList.toggle('liked');
-            heart.setAttribute('fill', isLiked ? 'currentColor' : 'none');
+            if (heart) heart.setAttribute('fill', isLiked ? 'currentColor' : 'none');
             countEl.textContent = count;
         }
     } catch (err) {
-        // Revertir si hay error de red
         btn.classList.toggle('liked');
-        heart.setAttribute('fill', isLiked ? 'currentColor' : 'none');
+        if (heart) heart.setAttribute('fill', isLiked ? 'currentColor' : 'none');
         countEl.textContent = count;
         console.error(err);
     }
@@ -379,87 +483,7 @@ async function handleDelete(postId) {
     }
 }
 
-// ==========================================
-// BUSCADOR (conectado al backend)
-// ==========================================
 
-function initSearch() {
-    const input   = document.getElementById('searchInput');
-    const results = document.getElementById('searchResults');
-    let debounceTimer;
-
-    input.addEventListener('input', function () {
-        const query = input.value.trim();
-        clearTimeout(debounceTimer);
-
-        if (query.length < 2) {
-            results.classList.remove('visible');
-            return;
-        }
-
-        debounceTimer = setTimeout(function () { searchUsers(query); }, 300);
-    });
-
-    document.addEventListener('click', function (e) {
-        if (!e.target.closest('.nav-search')) {
-            results.classList.remove('visible');
-        }
-    });
-}
-
-async function searchUsers(query) {
-    const results = document.getElementById('searchResults');
-
-    try {
-        const response = await fetch(API_URL + '/profiles/search?q=' + encodeURIComponent(query), {
-            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-        });
-
-        if (!response.ok) return;
-
-        const users = await response.json();
-
-        if (users.length === 0) {
-            results.classList.remove('visible');
-            return;
-        }
-
-        results.innerHTML = users.map(function (u) {
-            const initial = (u.displayName || u.username || 'U').charAt(0).toUpperCase();
-            return (
-                '<div class="search-result-item" onclick="goToProfile(\'' + u.username + '\')">' +
-                    '<div class="search-result-avatar">' + initial + '</div>' +
-                    '<div>' +
-                        '<p class="search-result-name">' + escapeHTML(u.displayName || u.username) + '</p>' +
-                        '<p class="search-result-username">@' + escapeHTML(u.username) + '</p>' +
-                    '</div>' +
-                '</div>'
-            );
-        }).join('');
-
-        results.classList.add('visible');
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-// ==========================================
-// LOGOUT
-// ==========================================
-
-function initLogout() {
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function () {
-            if (confirm('¿Cerrar sesión?')) logout();
-        });
-    }
-}
-
-function logout() {
-    localStorage.clear();
-    window.location.href = 'login.html';
-}
 
 // ==========================================
 // NAVEGACIÓN Y UTILIDADES
@@ -488,6 +512,8 @@ function escapeHTML(str) {
     div.textContent = str;
     return div.innerHTML;
 }
+
+
 
 // ==========================================
 // LIGHTBOX (ver imagen completa)
@@ -521,4 +547,72 @@ function closeLightbox() {
     const overlay = document.getElementById('lightboxOverlay');
     overlay.classList.remove('active');
     document.body.style.overflow = '';
+}
+
+
+// ==========================================
+// SCROLL INFINITO — PEGAR AL FINAL DE feed.js
+// ==========================================
+
+
+
+// ==========================================
+// SCROLL INFINITO DEL FEED
+// ==========================================
+
+/**
+ * initInfiniteScroll()
+ *
+ * Crea un IntersectionObserver que vigila el elemento #feedSentinel.
+ * Cuando ese elemento entra en el viewport (el usuario llega al final
+ * de la lista), comprueba dos condiciones antes de pedir más datos:
+ *   1. !isLoading  → no hay ya una petición en vuelo
+ *   2.  hasMore    → el backend confirmó que existen más páginas
+ *
+ * Si ambas se cumplen, llama a loadFeed(currentPage + 1).
+ *
+ * El observer se desconecta automáticamente cuando hasMore es false
+ * (ya no tiene sentido seguir observando si no hay más datos).
+ *
+ * ¿Por qué threshold: 0.1?
+ * Con 0 (valor por defecto) el callback se dispara en cuanto un solo
+ * píxel del sentinel es visible. Con 0.1 esperamos a que el 10 % esté
+ * visible, lo que reduce falsos positivos en dispositivos lentos donde
+ * el scroll puede "rebotar" justo en el borde.
+ */
+function initInfiniteScroll() {
+  const sentinel = document.getElementById('feedSentinel');
+  if (!sentinel) return; // prevención por si: si no está el HTML no hacemos nada
+
+  const observer = new IntersectionObserver(
+    function(entries) {
+      // entries[0] es el centinela (solo observamos uno)
+      // isIntersecting = true cuando el elemento entra en la pantalla
+      const entry = entries[0];
+      if (!entry.isIntersecting) return;
+
+      // Si no hay más páginas, desconectar el observer para liberar recursos
+      if (!hasMore) {
+        observer.disconnect();
+        return;
+      }
+
+      // Si hay otra petición en este momento, lo mejor es ignorar este trigger porque le doy prioridad a otras
+      if (isLoading) return;
+
+      // ✅ Todo correcto: pedir la siguiente página
+      loadFeed(currentPage + 1);
+    },
+    {
+      // root: null   → el viewport del navegador es el área de observación
+      // rootMargin   → activar 100px antes de que sea visible (precarga anticipada)
+      // threshold    → con que el 10 % sea visible ya es suficiente
+      root:       null,
+      rootMargin: '0px 0px 100px 0px',
+      threshold:  0.1
+    }
+  );
+
+  // Empezar a observar el centinela
+  observer.observe(sentinel);
 }

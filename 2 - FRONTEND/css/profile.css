@@ -3,6 +3,195 @@
    Se carga junto a feed.css
    ========================================== */
 
+
+
+
+  /* ==========================================
+  NAVBAR
+  ========================================== */
+
+.navbar {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Logo con el mismo gradiente del login */
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.logo-icon {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.logo-text {
+  /* Mismo truco del gradiente en texto que usas en el h1 del login */
+  background: linear-gradient(220deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Buscador */
+.nav-search {
+  flex: 1;
+  max-width: 300px;
+  position: relative;
+}
+
+.nav-search input {
+  width: 100%;
+  padding: 8px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.nav-search input:focus {
+  border-color: #667eea;
+}
+
+/* Resultados del buscador */
+.search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  display: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.search-results.visible {
+  display: block;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-result-item:hover {
+  background: #f5f5f5;
+}
+
+.search-result-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.search-result-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.search-result-username {
+  font-size: 12px;
+  color: #999;
+}
+
+/* Perfil y logout en la navbar */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.nav-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.nav-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nav-username {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+}
+
+.btn-logout {
+  font-size: 13px;
+  font-weight: 600;
+  color: #999;
+  padding: 6px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  transition: border-color 0.3s, color 0.3s;
+}
+
+.btn-logout:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
 /* ==========================================
    LAYOUT DEL PERFIL
    ========================================== */
@@ -462,4 +651,14 @@
   .profile-avatar { width: 64px; height: 64px; font-size: 24px; }
   .profile-stats { gap: 16px; }
   .follow-list-body { max-height: 320px; }
+}
+
+
+/* ==========================================
+   INFINITE SCROLL
+   ========================================== */
+
+#profileSentinel {
+  height: 20px;
+  margin-top: 8px;
 }

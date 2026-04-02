@@ -7,7 +7,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil - Prometeo</title>
+  <title>Perfil - SOCIAL WEB</title>
   <link rel="stylesheet" href="css/feed.css">
   <link rel="stylesheet" href="css/profile.css">
 </head>
@@ -16,21 +16,30 @@
   <!-- Navbar: igual que en feed.html -->
   <nav class="navbar">
     <div class="nav-inner">
+
+      <!-- Logo con el mismo gradiente del login -->
       <a href="feed.html" class="nav-logo">
-        <span class="logo-icon">P</span>
-        <span class="logo-text">PROMETEO</span>
+        <span class="logo-icon">SW</span>
+        <span class="logo-text">SOCIAL WEB</span>
       </a>
+
+      <!-- Buscador de usuarios -->
       <div class="nav-search">
         <input type="text" id="searchInput" placeholder="Buscar usuarios..." autocomplete="off">
+        <!-- Dropdown con resultados -->
         <div class="search-results" id="searchResults"></div>
       </div>
+
+      <!-- Usuario logueado y logout -->
       <div class="nav-actions">
         <a href="profile.html" class="nav-profile">
-          <div class="nav-avatar" id="navAvatar">F</div>
-          <span class="nav-username" id="navUsername">@fabio</span>
+          <!-- La inicial y nombre se rellenan con JS -->
+          <div class="nav-avatar" id="navAvatar">P</div>
+          <span class="nav-username" id="navUsername">@SOCIAL WEB</span>
         </a>
         <button class="btn-logout" id="logoutBtn">Salir</button>
       </div>
+
     </div>
   </nav>
 
@@ -55,8 +64,8 @@
       </div>
 
       <!-- Datos del usuario -->
-      <h1 class="profile-display-name" id="profileDisplayName">Fabio Cuffaro</h1>
-      <p class="profile-username" id="profileUsername">@fabio</p>
+      <h1 class="profile-display-name" id="profileDisplayName">SOCIAL</h1>
+      <p class="profile-username" id="profileUsername">@SOCIAL</p>
       <p class="profile-bio" id="profileBio"></p>
 
       <!-- Ubicación y web (opcionales) -->
@@ -90,6 +99,8 @@
         <div class="skeleton-post"></div>
         <div class="skeleton-post"></div>
       </div>
+      <!-- Centinela del perfil -->
+      <div id="profileSentinel"></div>
     </div>
 
   </main>

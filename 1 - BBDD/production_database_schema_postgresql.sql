@@ -172,8 +172,8 @@ CREATE INDEX IF NOT EXISTS idx_follows_follower_id ON follows(follower_id);
 -- ================================================
 -- ⚠️  SOLO PARA DESARROLLO LOCAL. NUNCA EN PRODUCCIÓN.
 --
--- Las contraseñas son '123456' hasheadas con BCrypt (coste 10).
--- Se pueden usar directamente para hacer login en Postman o en el navegador.
+-- Las contraseñas son '123456'.
+-- No se puede acceder a ellas puesto que no están hasheadas
 --
 -- IMPORTANTE: no especificamos el campo id para que PostgreSQL
 -- use la secuencia automática y no haya colisiones al registrar
@@ -182,25 +182,101 @@ CREATE INDEX IF NOT EXISTS idx_follows_follower_id ON follows(follower_id);
 
 /*
 
--- 1. USUARIOS (sin id manual, sin contraseña en texto plano)
-INSERT INTO users (email, password, role, is_active) VALUES
-  ('fabio@gmail.com',  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN', true),
-  ('maria@gmail.com',  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'USER',  true),
-  ('carlos@gmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'USER',  true);
+-- ================================================
+-- USUARIOS DE PRUEBA — IDs 15 al 19
+-- (Los IDs 1, 2 y 3 ya existen en tu schema)
+-- ================================================
 
--- 2. PERFILES (usamos subconsulta para obtener el user_id sin hardcodearlo)
-INSERT INTO profiles (user_id, username, display_name, bio, location) VALUES
-  ((SELECT id FROM users WHERE email = 'fabio@gmail.com'),  'fabio',     'Fabio Cuffaro',    'Estudiante DAM y Administrador', 'Granada'),
-  ((SELECT id FROM users WHERE email = 'maria@gmail.com'),  'maria_dev', 'María García',     'Frontend y CSS.',                'Madrid'),
-  ((SELECT id FROM users WHERE email = 'carlos@gmail.com'), 'carlos',    'Carlos Rodríguez', 'Estudiante DAM.',                'Sevilla');
+INSERT INTO users (id, email, password, role, is_active) VALUES
+  (15, 'lucia@gmail.com',    '1231556', 'USER', true),
+  (16, 'adrian@gmail.com',   '1231556', 'USER', true),
+  (17, 'sara@gmail.com',     '1231556', 'USER', true),
+  (18, 'miguel@gmail.com',   '1231556', 'USER', true);
 
--- 3. POSTS (igual, subconsulta para el user_id)
+-- ================================================
+-- PERFILES
+-- ================================================
+
+INSERT INTO profiles (user_id, username, display_name, bio, location, website) VALUES
+  (15, 'lucia_code',   'Lucía Fernández',  'Apasionada del diseño UX y el café ☕. Estudiante de DAW en Granada.',          'Granada',   'https://lucia.dev'),
+  (16, 'adrian_dev',   'Adrián Torres',    'Backend lover. Spring Boot, Docker y mucho Stack Overflow 🐳.',                 'Valencia',  'https://adriantorres.io'),
+  (17, 'sara_pixels',  'Sara Molina',      'Diseñadora gráfica metida a programadora. CSS es mi terapia 🎨.',               'Barcelona', 'https://saramolina.es'),
+  (18, 'miguel_stack', 'Miguel Ángel Ruiz','Full stack en proceso. De 0 a producción paso a paso. Café y código 🚀.',       'Madrid',    'https://miguelruiz.dev');
+
+-- ================================================
+-- POSTS — mínimo 15 por usuario
+-- ================================================
+
+-- Lucía (user_id = 15)
 INSERT INTO posts (user_id, content) VALUES
-  ((SELECT id FROM users WHERE email = 'fabio@gmail.com'),  'Primer post de Fabio. El backend está arriba.'),
-  ((SELECT id FROM users WHERE email = 'fabio@gmail.com'),  'Segundo post de Fabio. PostgreSQL conectado.'),
-  ((SELECT id FROM users WHERE email = 'maria@gmail.com'),  'María aquí. El frontend ya está maquetado.'),
-  ((SELECT id FROM users WHERE email = 'carlos@gmail.com'), 'Carlos el colega. Todo bajo control.');
+  (15, 'Primer día usando Figma en serio y ya no puedo vivir sin los Auto Layout. ¿Por qué nadie me lo dijo antes? 😅'),
+  (15, 'Tip de CSS: si usas gap en un flexbox te ahorras todos los margin-right de los hijos. Pequeñas cosas que cambian la vida.'),
+  (15, 'Llevaba tres horas buscando el bug. Era una coma de más en el JSON. Siempre es una coma de más.'),
+  (15, 'Acabo de desplegar mi primer proyecto en Vercel y funciona a la primera. Esto no puede ser real, algo está mal 🤔'),
+  (15, 'Reminder: el diseño responsive no es opcional, es el mínimo. Si tu web se rompe en móvil, tu web está rota.');
 
+-- Adrián (user_id = 5)
+INSERT INTO posts (user_id, content) VALUES
+  (16, 'Spring Security me tiene bloqueado desde el lunes. El 1503 más misterioso de mi vida. Alguien que haya peleado con CORS que me escriba.'),
+  (16, 'Docker Compose para el entorno de desarrollo es lo mejor que me ha pasado este año. Un solo comando y todo arriba. Magia pura.'),
+  (16, 'Regla de oro: nunca hagas un DELETE sin WHERE en producción. Lo digo por experiencia propia. No preguntéis.'),
+  (16, 'Hoy he aprendido qué es el problema N+1 en JPA y ahora entiendo por qué las queries tardaban tanto. JOIN FETCH al rescate 🔥'),
+  (16, 'PostgreSQL > MySQL. Lo he dicho. No voy a debatir esto a estas horas de la noche.');
+
+-- Sara (user_id = 6)
+INSERT INTO posts (user_id, content) VALUES
+  (17, 'Hay dos tipos de personas: las que usan variables CSS y las que copian el color hexadecimal en cada selector. Sé la primera.'),
+  (17, 'Hoy he convencido a mi equipo de migrar de px a rem para accesibilidad. Pequeña victoria del día 💪'),
+  (17, 'Grid o Flexbox, esa es la cuestión. Mi respuesta: Grid para el layout general, Flex para los componentes. Los dos juntos son imbatibles.'),
+  (17, 'Animaciones CSS bien hechas marcan la diferencia entre una web normal y una web que la gente recuerda. No las descuidéis.'),
+  (17, 'Acabo de revisar código de hace seis meses. No reconozco ni los nombres de las variables. Documentad, por favor. Por el bien de vuestro yo futuro.');
+
+-- Miguel (user_id = 7)
+INSERT INTO posts (user_id, content) VALUES
+  (18, 'Semana 1 aprendiendo React: esto no tiene ningún sentido. Semana 15: esto es lo más lógico del mundo. El viaje vale la pena.'),
+  (18, 'JWT me parece magia negra desde fuera y sentido común desde dentro. Hay que leer sobre cómo funciona antes de usarlo, no después.'),
+  (18, 'Mito: los buenos programadores memorizan todo. Realidad: los buenos programadores saben qué buscar y cómo leer la documentación.'),
+  (18, 'Git commit -m "fix" por decimoquinta vez seguida. Hoy no ha sido mi día 😅'),
+  (18, 'Acabo de terminar mi primera API REST completa con autenticación. Hace seis meses no sabía ni qué era un endpoint. Seguid adelante.');
+
+-- ================================================
+-- FOLLOWS opcionales para que la app tenga más vida
+-- ================================================
+
+INSERT INTO follows (follower_id, following_id) VALUES
+  (15, 16),
+  (15, 18),
+  (16, 15),
+  (16, 17),
+  (17, 15),
+  (17,18),
+  (18, 16),
+  (18, 17),
+  (15, 14),
+  (16, 14),
+  (17, 14),
+  (18, 14);
+
+
+-- ================================================
+-- LIKES
+-- ================================================
+
+INSERT INTO likes (user_id, post_id) 
+VALUES (15, 6);
+
+
+
+-- Verificar que todo se insertó bien
+SELECT u.id, u.email, u.role, p.username, p.display_name, p.location
+FROM users u
+INNER JOIN profiles p ON u.id = p.user_id
+ORDER BY u.id;
+
+SELECT p.id, pr.username, LEFT(p.content, 60) AS preview
+FROM posts p
+INNER JOIN profiles pr ON p.user_id = pr.user_id
+ORDER BY p.user_id, p.id;
 */
 
 

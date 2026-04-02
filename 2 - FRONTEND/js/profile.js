@@ -8,6 +8,7 @@ const API_URL_PROFILE = 'http://localhost:8080/api';
 // Se guarda aquí para que initFollowListModal pueda usarlo sin parámetros.
 let currentProfileUsername = null;
 
+
 // ==========================================
 // ARRANQUE
 // ==========================================
@@ -20,11 +21,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     initNavbar();
+    initSearch();
     loadProfile();
     initEditModal();
     initFollowListModal();
     initLogoutProfile();
+    initProfileInfiniteScroll();
 });
+
+
 
 // ==========================================
 // NAVBAR
@@ -40,40 +45,61 @@ function initNavbar() {
     if (navAvatar) navAvatar.textContent = initial;
 }
 
+
+
 // ==========================================
 // CARGAR PERFIL DEL BACKEND
 // ==========================================
 
+// ── ESTADO DEL PERFIL ──────────────────────────────────────────
+// profileCurrentPage   → última página de posts de perfil cargada
+// profileIsLoading     → semáforo anti-peticiones simultáneas
+// profileHasMore       → ¿hay más posts en el backend?
+// profileUserId        → ID del usuario cuyo perfil se está viendo
+//                        (necesario para poder pedir más páginas
+//                         desde initProfileInfiniteScroll sin parámetros)
+// profileIsOwnProfile  → para el mensaje de estado vacío
+let profileCurrentPage  = 0;
+let profileIsLoading    = false;
+let profileHasMore      = true;
+let profileUserId       = null;
+let profileIsOwnProfile = false;
+
 async function loadProfile() {
-    const params   = new URLSearchParams(window.location.search);
-    const username = params.get('user') || localStorage.getItem('username');
+  const params   = new URLSearchParams(window.location.search);
+  const username = params.get('user') || localStorage.getItem('username');
 
-    try {
-        const response = await fetch(API_URL_PROFILE + '/profiles/' + username, {
-            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-        });
+  try {
+    const response = await fetch(API_URL_PROFILE + '/profiles/' + username, {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
 
-        if (response.status === 401) { logoutProfile(); return; }
+    if (response.status === 401) { logoutProfile(); return; }
+    if (!response.ok) { showProfileError('Perfil no encontrado'); return; }
 
-        if (!response.ok) {
-            showProfileError('Perfil no encontrado');
-            return;
-        }
+    const profile     = await response.json();
+    const isOwnProfile = profile.username === localStorage.getItem('username');
 
-        const profile = await response.json();
-        const isOwnProfile = profile.username === localStorage.getItem('username');
+    renderProfile(profile, isOwnProfile);
 
-        renderProfile(profile, isOwnProfile);
-        loadUserPostsProfile(profile.userId, isOwnProfile);
+    // ── GUARDAR EN VARIABLES DE MÓDULO ─────────────────────────────
+    // initProfileInfiniteScroll los leerá cuando el observer se dispare.
+    // Si no los guardamos aquí, el observer no sabría de qué usuario
+    // pedir más posts.
+    profileUserId       = profile.userId;      // ← NUEVO
+    profileIsOwnProfile = isOwnProfile;        // ← NUEVO
 
-    } catch (err) {
-        showProfileError('No se puede conectar con el servidor');
-        console.error(err);
-    }
+    // Cargar la primera página de posts del perfil
+    loadUserPostsProfile(0);  // ← pasa solo el número de página
+
+  } catch (err) {
+    showProfileError('No se puede conectar con el servidor');
+    console.error(err);
+  }
 }
 
 function renderProfile(profile, isOwnProfile) {
-    document.title = (profile.displayName || profile.username) + ' - Prometeo';
+    document.title = (profile.displayName || profile.username) + ' - Social Web';
 
     const initial = (profile.displayName || profile.username || 'U').charAt(0).toUpperCase();
     const profileAvatar = document.getElementById('profileAvatar');
@@ -175,51 +201,86 @@ async function handleFollowClick() {
     }
 }
 
+
+
 // ==========================================
 // POSTS DEL USUARIO EN SU PERFIL
 // ==========================================
 
-async function loadUserPostsProfile(userId, isOwnProfile) {
-    const list = document.getElementById('profilePostsList');
+/**
+ * loadUserPostsProfile(page)
+ *
+ * Carga una página de posts del usuario cuyo ID está en profileUserId.
+ *
+ * @param {number} page  Número de página a cargar (0 = primera).
+ *
+ * ¿Por qué solo vaciar el DOM en page === 0?
+ * En las páginas siguientes queremos añadir posts a los que ya están,
+ * no reemplazarlos. Vaciar el DOM en page > 0 destruiría el scroll
+ * que el usuario ya tenía.
+ */
+async function loadUserPostsProfile(page) {
+  if (profileIsLoading) return;
+  if (!profileHasMore && page !== 0) return;
 
-    try {
-        const response = await fetch(API_URL_PROFILE + '/posts/user/' + userId + '?page=0', {
-            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-        });
+  profileIsLoading = true;
+  const list = document.getElementById('profilePostsList');
 
-        if (!response.ok) {
-            list.innerHTML = '<div class="empty-state"><p class="empty-state-title">Error al cargar posts</p></div>';
-            return;
-        }
+  try {
+    const response = await fetch(
+      API_URL_PROFILE + '/posts/user/' + profileUserId + '?page=' + page,
+      { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }
+    );
 
-        const data = await response.json();
-        list.innerHTML = '';
-
-        if (!data.content || data.content.length === 0) {
-            const msg = isOwnProfile
-                ? '¡Comparte algo con la comunidad!'
-                : 'Este usuario no ha publicado nada todavía.';
-            list.innerHTML =
-                '<div class="empty-state">' +
-                    '<div class="empty-state-icon">✏️</div>' +
-                    '<p class="empty-state-title">Aún no hay posts</p>' +
-                    '<p class="empty-state-text">' + msg + '</p>' +
-                '</div>';
-            return;
-        }
-
-        data.content.forEach(function (post) {
-            const temp = document.createElement('div');
-            temp.innerHTML = createPostHTML(post);
-            const card = temp.firstElementChild;
-            list.appendChild(card);
-            attachPostEvents(post.id);
-        });
-
-    } catch (err) {
-        list.innerHTML = '<div class="empty-state"><p class="empty-state-title">Error al cargar posts</p></div>';
-        console.error(err);
+    if (!response.ok) {
+      if (page === 0)
+        list.innerHTML = '<div class="empty-state"><p>Error al cargar posts</p></div>';
+      return;
     }
+
+    const data = await response.json();
+
+    // Solo limpiar el contenedor en la primera carga
+    if (page === 0) {
+      list.innerHTML = '';
+      profileHasMore = true; // reiniciar por si el usuario cambió de perfil
+    }
+
+    // Estado vacío (solo en página 0 y sin resultados)
+    if (!data.content || data.content.length === 0 && page === 0) {
+      const msg = profileIsOwnProfile
+        ? '¡Comparte algo con la comunidad!'
+        : 'Este usuario no ha publicado nada todavía.';
+      list.innerHTML =
+        '<div class="empty-state">' +
+          '<div class="empty-state-icon">✏️</div>' +
+          '<p class="empty-state-title">Aún no hay posts</p>' +
+          '<p class="empty-state-text">' + msg + '</p>' +
+        '</div>';
+      profileHasMore = false;
+      return;
+    }
+
+    // Añadir posts al DOM
+    data.content.forEach(function(post) {
+      const temp = document.createElement('div');
+      temp.innerHTML = createPostHTML(post);
+      const card = temp.firstElementChild;
+      list.appendChild(card);
+      attachPostEvents(post.id);
+    });
+
+    // Actualizar estado de paginación
+    profileCurrentPage = data.number;
+    profileHasMore     = !data.last;  // ← clave
+
+  } catch (err) {
+    if (page === 0)
+      list.innerHTML = '<div class="empty-state"><p>Error al cargar posts</p></div>';
+    console.error(err);
+  } finally {
+    profileIsLoading = false;
+  }
 }
 
 // ==========================================
@@ -296,6 +357,10 @@ async function handleSaveProfile() {
         console.error(err);
     }
 }
+
+
+
+
 
 // ==========================================
 // MODAL DE SEGUIDORES / SIGUIENDO
@@ -441,6 +506,12 @@ function goToProfileFromModal(username) {
     window.location.href = 'profile.html?user=' + username;
 }
 
+
+
+
+
+
+
 // ==========================================
 // LOGOUT
 // ==========================================
@@ -459,165 +530,70 @@ function logoutProfile() {
     window.location.href = 'login.html';
 }
 
+
+
+
+
+
+
 // ==========================================
 // NAVEGACIÓN + UTILIDADES (reutilizadas de feed.js)
 // ==========================================
 
-function goToProfile(username) {
-    window.location.href = 'profile.html?user=' + username;
-}
-
-function createPostHTML(post) {
-    const currentUserId = parseInt(localStorage.getItem('userId'));
-    const initial      = (post.authorDisplayName || 'U').charAt(0).toUpperCase();
-    const isOwner      = post.authorId === currentUserId;
-
-    // Leemos el role que login.js guardó en localStorage tras el login.
-    // AuthResponse.java lo devuelve como "ADMIN" o "USER" (sin prefijo ROLE_).
-    // login.js → localStorage.setItem('role', data.role)
-    const isAdmin = localStorage.getItem('role') === 'ADMIN';
-
-    // El botón aparece si el usuario es el autor del post O si es admin.
-    // El backend (PostService.deletePost) ya tiene la misma lógica y acepta
-    // peticiones DELETE de admins aunque no sean el autor.
-
-    const likedClass   = post.likedByCurrentUser ? 'liked' : '';
-    const heartFill    = post.likedByCurrentUser ? 'currentColor' : 'none';
-
-    const heartSVG =
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="' + heartFill + '" stroke="currentColor" stroke-width="2">' +
-            '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' +
-        '</svg>';
-
-    const avatarContent = post.authorAvatarUrl
-        ? '<img src="' + post.authorAvatarUrl + '" alt="avatar">'
-        : initial;
-
-    const imageHTML = post.imageUrl
-        ? '<img src="' + post.imageUrl + '" alt="imagen" class="post-image">'
-        : '';
-
-    const deleteBtn = (isOwner || isAdmin)
-        ? '<button class="btn-delete-post visible" data-post-id="' + post.id + '">🗑 Eliminar</button>'
-        : '';
-
-    return (
-        '<div class="post-card" data-post-id="' + post.id + '">' +
-            '<div class="post-header">' +
-                '<div class="post-avatar" onclick="goToProfile(\'' + post.authorUsername + '\')">' + avatarContent + '</div>' +
-                '<div>' +
-                    '<p class="post-author-name" onclick="goToProfile(\'' + post.authorUsername + '\')">' + escapeHTML(post.authorDisplayName || 'Usuario') + '</p>' +
-                    '<p class="post-author-username">@' + escapeHTML(post.authorUsername || '') + '</p>' +
-                '</div>' +
-                '<span class="post-time">' + formatTime(post.createdAt) + '</span>' +
-            '</div>' +
-            '<p class="post-content">' + escapeHTML(post.content) + '</p>' +
-            imageHTML +
-            '<div class="post-footer">' +
-                '<button class="btn-like ' + likedClass + '" data-post-id="' + post.id + '">' + heartSVG + '<span class="like-count">' + post.likeCount + '</span></button>' +
-                deleteBtn +
-            '</div>' +
-        '</div>'
-    );
-}
-
-function attachPostEvents(postId) {
-    const likeBtn = document.querySelector('.btn-like[data-post-id="' + postId + '"]');
-    if (likeBtn) {
-        likeBtn.addEventListener('click', async function () {
-            const isLiked = likeBtn.classList.contains('liked');
-            const countEl = likeBtn.querySelector('.like-count');
-            const heart   = likeBtn.querySelector('svg');
-            const count   = parseInt(countEl.textContent);
-
-            likeBtn.classList.toggle('liked');
-            heart.setAttribute('fill', isLiked ? 'none' : 'currentColor');
-            countEl.textContent = isLiked ? count - 1 : count + 1;
-
-            try {
-                const res = await fetch(API_URL_PROFILE + '/posts/' + postId + '/like', {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-                });
-                if (!res.ok) {
-                    likeBtn.classList.toggle('liked');
-                    heart.setAttribute('fill', isLiked ? 'currentColor' : 'none');
-                    countEl.textContent = count;
-                }
-            } catch (err) {
-                likeBtn.classList.toggle('liked');
-                heart.setAttribute('fill', isLiked ? 'currentColor' : 'none');
-                countEl.textContent = count;
-            }
-        });
-    }
-
-    const deleteBtn = document.querySelector('.btn-delete-post[data-post-id="' + postId + '"]');
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', async function () {
-            if (!confirm('¿Seguro que quieres eliminar este post?')) return;
-            try {
-                const res = await fetch(API_URL_PROFILE + '/posts/' + postId, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-                });
-                if (res.ok || res.status === 204) {
-                    const card = document.querySelector('.post-card[data-post-id="' + postId + '"]');
-                    if (card) card.remove();
-                }
-            } catch (err) { console.error(err); }
-        });
-    }
-}
 
 function showProfileError(msg) {
     document.getElementById('profileDisplayName').textContent = msg;
 }
 
-function formatTime(dateStr) {
-    const now  = new Date();
-    const date = new Date(dateStr);
-    const diff = Math.floor((now - date) / 1000);
-    if (diff < 60)        return 'ahora';
-    if (diff < 3600)      return 'hace ' + Math.floor(diff / 60) + 'm';
-    if (diff < 86400)     return 'hace ' + Math.floor(diff / 3600) + 'h';
-    if (diff < 86400 * 7) return 'hace ' + Math.floor(diff / 86400) + 'd';
-    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-}
 
-function escapeHTML(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
 
-function initLightbox() {
-    const overlay   = document.getElementById('lightboxOverlay');
-    const closeBtn  = document.getElementById('lightboxClose');
 
-    // Cerrar al pulsar ✕ o al hacer clic fuera de la imagen
-    closeBtn.addEventListener('click', closeLightbox);
-    overlay.addEventListener('click', function (e) {
-        if (e.target === overlay) closeLightbox();
-    });
 
-    // Cerrar con Escape
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeLightbox();
-    });
-}
 
-function openLightbox(src) {
-    const overlay = document.getElementById('lightboxOverlay');
-    const img     = document.getElementById('lightboxImg');
-    img.src = src;
-    overlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
 
-function closeLightbox() {
-    const overlay = document.getElementById('lightboxOverlay');
-    overlay.classList.remove('active');
-    document.body.style.overflow = '';
+// ==========================================
+// SCROLL INFINITO DEL PERFIL
+// ==========================================
+
+/**
+ * initProfileInfiniteScroll()
+ *
+ * Observa el #profileSentinel. Cuando entra en el viewport
+ * llama a loadUserPostsProfile(profileCurrentPage + 1).
+ *
+ * Usa las mismas variables de estado (profileIsLoading, profileHasMore)
+ * que loadUserPostsProfile para garantizar consistencia.
+ *
+ * Se llama UNA SOLA VEZ desde DOMContentLoaded. No se recrea
+ * cuando cambia de perfil porque el observer ya existe y sigue
+ * funcionando; lo que cambia son las variables de estado y profileUserId.
+ */
+function initProfileInfiniteScroll() {
+  const sentinel = document.getElementById('profileSentinel');
+  if (!sentinel) return;
+
+  const observer = new IntersectionObserver(
+    function(entries) {
+      const entry = entries[0];
+      if (!entry.isIntersecting) return;
+
+      if (!profileHasMore) {
+        observer.disconnect();
+        return;
+      }
+
+      if (profileIsLoading) return;
+
+      // profileUserId se rellena en loadProfile() antes de que este
+      // observer pueda dispararse, así que siempre tendrá valor
+      loadUserPostsProfile(profileCurrentPage + 1);
+    },
+    {
+      root:       null,
+      rootMargin: '0px 0px 100px 0px',
+      threshold:  0.1
+    }
+  );
+
+  observer.observe(sentinel);
 }

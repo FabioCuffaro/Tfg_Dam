@@ -292,7 +292,10 @@ button {
   margin-top: 12px;
 }
 
+
 .image-preview-thumb {
+  margin-left: 53px;
+  right: 200px;
   max-height: 160px;
   max-width: 100%;
   border-radius: 8px;
@@ -401,6 +404,7 @@ button {
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin-top: 15px;
 }
 
 .post-header {
@@ -642,4 +646,15 @@ button {
   .main-layout { padding: 16px; }
   .nav-username { display: none; }
   .logo-text { display: none; }
+}
+
+
+
+/* ==========================================
+   INFINITE SCROLL
+   ========================================== */
+
+#feedSentinel {
+  height: 20px;
+  margin-top: 8px;
 }

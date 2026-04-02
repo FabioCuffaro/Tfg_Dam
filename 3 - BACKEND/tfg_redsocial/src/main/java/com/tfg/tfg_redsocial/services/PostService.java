@@ -167,6 +167,9 @@ public class PostService {
             likeRepository.save(like);
         }
 
+        //Método para forzar que countByPostId vea los cambios
+        likeRepository.flush();
+
         return toPostResponse(post, currentUser.getId());
     }
 
