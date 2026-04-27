@@ -3,11 +3,14 @@ package com.tfg.tfg_redsocial.controllers;
 import com.tfg.tfg_redsocial.dtos.PostResponse;
 import com.tfg.tfg_redsocial.models.User;
 import com.tfg.tfg_redsocial.services.PostService;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 @RequestMapping("/api/posts")
+@Validated
 public class PostController {
 
     private final PostService postService;
@@ -91,7 +95,10 @@ public class PostController {
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PostResponse> createPost(
-            @RequestParam String content,
+            @RequestParam
+            @NotBlank(message = "El contenido del post no puede estar vacío")
+            @Size(max = 500, message = "El post no puede superar 500 caracteres")
+            String content,
             @RequestParam(required = false) MultipartFile image) {
         User currentUser = getCurrentUser();
         PostResponse response = postService.createPost(currentUser, content, image);

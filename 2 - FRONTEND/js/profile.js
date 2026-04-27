@@ -10,6 +10,25 @@ let currentProfileUsername = null;
 
 
 // ==========================================
+// CARGAR PERFIL DEL BACKEND
+// ==========================================
+
+// ── ESTADO DEL PERFIL ──────────────────────────────────────────
+// profileCurrentPage   → última página de posts de perfil cargada
+// profileIsLoading     → semáforo anti-peticiones simultáneas
+// profileHasMore       → ¿hay más posts en el backend?
+// profileUserId        → ID del usuario cuyo perfil se está viendo
+//                        (necesario para poder pedir más páginas
+//                         desde initProfileInfiniteScroll sin parámetros)
+// profileIsOwnProfile  → para el mensaje de estado vacío
+let profileCurrentPage  = 0;
+let profileIsLoading    = false;
+let profileHasMore      = true;
+let profileUserId       = null;
+let profileIsOwnProfile = false;
+
+
+// ==========================================
 // ARRANQUE
 // ==========================================
 
@@ -47,25 +66,15 @@ function initNavbar() {
 
 
 
-// ==========================================
-// CARGAR PERFIL DEL BACKEND
-// ==========================================
 
-// ── ESTADO DEL PERFIL ──────────────────────────────────────────
-// profileCurrentPage   → última página de posts de perfil cargada
-// profileIsLoading     → semáforo anti-peticiones simultáneas
-// profileHasMore       → ¿hay más posts en el backend?
-// profileUserId        → ID del usuario cuyo perfil se está viendo
-//                        (necesario para poder pedir más páginas
-//                         desde initProfileInfiniteScroll sin parámetros)
-// profileIsOwnProfile  → para el mensaje de estado vacío
-let profileCurrentPage  = 0;
-let profileIsLoading    = false;
-let profileHasMore      = true;
-let profileUserId       = null;
-let profileIsOwnProfile = false;
 
 async function loadProfile() {
+  // Resetear estado antes del fetch asíncrono para que el IntersectionObserver
+  // no dispare loadUserPostsProfile con el userId de un perfil anterior (o null)
+  profileUserId      = null;
+  profileCurrentPage = 0;
+  profileHasMore     = true;
+
   const params   = new URLSearchParams(window.location.search);
   const username = params.get('user') || localStorage.getItem('username');
 
@@ -222,6 +231,9 @@ async function handleFollowClick() {
 async function loadUserPostsProfile(page) {
   if (profileIsLoading) return;
   if (!profileHasMore && page !== 0) return;
+  // Guard: si profileUserId aún no está listo (loadProfile() no ha terminado),
+  // evitamos enviar "null" al backend y que Spring lance MethodArgumentTypeMismatchException
+  if (!profileUserId) return;
 
   profileIsLoading = true;
   const list = document.getElementById('profilePostsList');

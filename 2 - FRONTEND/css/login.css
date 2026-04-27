@@ -62,8 +62,15 @@
         .card h1 {
             font-size: 1.4rem;
             font-weight: 700;
-            color: var(--black);
             margin-bottom: 0.3rem;
+
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+
+            /* Para navegadores modernos */
+            background-clip: text;
+            color: transparent;
         }
 
         .card p.subtitle {

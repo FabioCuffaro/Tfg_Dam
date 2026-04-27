@@ -1,6 +1,7 @@
 package com.tfg.tfg_redsocial.security;
 
 import com.tfg.tfg_redsocial.repositories.UserRepository;
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -84,14 +86,22 @@ public class SecurityConfig {
                         // Rutas públicas: no necesitan token
                         // El usuario aún no tiene token cuando se registra o hace login
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/", "/favicon.ico").permitAll() // Permitir favicon
 
                         // Rutas de prueba (TestController): públicas durante desarrollo
                         // IMPORTANTE: eliminar o proteger antes del despliegue en producción
                         .requestMatchers("/test/**").permitAll()
 
-                        // GET públicos: cualquiera puede ver sin token
-                        .requestMatchers( "/api/posts/**").permitAll()
-                        .requestMatchers("/api/profiles/**").permitAll()
+                        // GET públicos: leer posts y perfiles no requiere token
+                        .requestMatchers(HttpMethod.GET,  "/api/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,  "/api/profiles/**").permitAll()
+
+                        // POST, PUT, DELETE siempre requieren token (crear post, editar perfil, likes, follows…)
+                        // Sin esto, un usuario anónimo llega al controller y provoca ClassCastException
+                        // al intentar castear "anonymousUser" (String) al tipo User de la aplicación
+                        .requestMatchers(HttpMethod.POST,   "/api/posts/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/posts/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT,    "/api/profiles/**").authenticated()
 
                         // Cualquier otra ruta requiere estar autenticado (tener token válido)
                         .anyRequest().authenticated()
@@ -101,6 +111,18 @@ public class SecurityConfig {
                 // Le decimos a Spring qué AuthenticationProvider usar.
                 // El nuestro usa UserDetailsService + BCrypt (definidos abajo).
                 .authenticationProvider(authenticationProvider())
+
+                // ========================MANEJO DE ERRORES HTTP========================
+                // Sin esto, Spring Security devuelve 403 para CUALQUIER fallo de auth,
+                // incluso cuando las credenciales son incorrectas (debería ser 401).
+                // - authenticationEntryPoint: token ausente o inválido → 401
+                // - accessDeniedHandler: token válido pero sin permisos → 403
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((req, res, e) ->
+                                res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No autorizado"))
+                        .accessDeniedHandler((req, res, e) ->
+                                res.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso denegado"))
+                )
 
                 // ========================FILTRO JWT=====================================
                 // Añadimos nuestro filtro ANTES del filtro estándar de Spring.
