@@ -80,14 +80,10 @@
                     body: JSON.stringify({ email, password })
                 });
 
-                // 5. Leer la respuesta como JSON
-                const data = await response.json();
-
-
-
-
                 if (response.ok) {
                     // ----------------------- LOGIN EXITOSO -------------------------------
+                    // 5. Leer la respuesta como JSON
+                    const data = await response.json();
                     // Guardamos en localStorage todo lo que el backend nos devuelve.
                     // El token es lo más importante: sin él no podemos hacer
                     // peticiones autenticadas al backend.
@@ -99,12 +95,12 @@
                     localStorage.setItem('displayName', data.displayName);
                     localStorage.setItem('role',        data.role);
 
-                    // Redirigir al feed
                     window.location.href = '/feed.html';
 
                 } else {
                     // --------------- ERROR DEL SERVIDOR -------------------------
-                    // // 401 = credenciales incorrectas
+
+                    // 401 = credenciales incorrectas
                     // 400 = datos inválidos
                     // 500 = error interno del servidor
                     if (response.status === 401) {

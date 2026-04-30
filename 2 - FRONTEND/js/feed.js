@@ -260,7 +260,8 @@ async function handlePublish() {
 
 let currentPage = 0;
 let isLoading   = false; //Evita lanzar dos fetch a la vez
-let hasMore = true; //Nueva variable para ver si hay más paginas para cargar 
+let hasMore = true; //Nueva variable para ver si hay más paginas para cargar
+const displayedPostIds = new Set(); //Nueva variable para cuando se recarga el scroll
 
 async function loadFeed(page) {
 
@@ -284,9 +285,11 @@ async function loadFeed(page) {
 
     // Primera página: limpiar skeletons/estado vacío anterior
     if (page === 0) {
+
+        // Reiniciar el estado por si el usuario recargó sin recargar la página
       postsList.innerHTML = '';
-      // Reiniciar el estado por si el usuario recargó sin recargar la página
       hasMore = true;
+      displayedPostIds.clear();
     }
 
     // Estado vacío total (primer fetch, sin resultados)
@@ -324,6 +327,7 @@ async function loadFeed(page) {
 }
 
 function addPostToTop(post) {
+    displayedPostIds.add(post.id);
     const postsList = document.getElementById('postsList');
     const emptyState = postsList.querySelector('.empty-state');
     if (emptyState) emptyState.remove();
@@ -336,6 +340,8 @@ function addPostToTop(post) {
 }
 
 function addPostToBottom(post) {
+    if (displayedPostIds.has(post.id)) return;
+    displayedPostIds.add(post.id);
     const postsList = document.getElementById('postsList');
     const temp = document.createElement('div');
     temp.innerHTML = createPostHTML(post);

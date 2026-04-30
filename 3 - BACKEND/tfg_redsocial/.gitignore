@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Configuración sensible — NO subir al repositorio ###
+src/main/resources/application.properties
+src/main/resources/application-*.properties
+src/main/resources/application.yml
+src/main/resources/application-*.yml
