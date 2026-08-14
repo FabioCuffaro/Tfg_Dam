@@ -14,7 +14,7 @@
         window.addEventListener('load', () => {
             const token = localStorage.getItem('token');
             if (token) {
-                window.location.href = '/feed.html';
+                window.location.href = './feed.html';
             }
         });
 
@@ -95,7 +95,7 @@
                     localStorage.setItem('displayName', data.displayName);
                     localStorage.setItem('role',        data.role);
 
-                    window.location.href = '/feed.html';
+                    window.location.href = './feed.html';
 
                 } else {
                     // --------------- ERROR DEL SERVIDOR -------------------------

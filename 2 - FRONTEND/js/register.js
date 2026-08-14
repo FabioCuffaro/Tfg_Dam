@@ -3,7 +3,7 @@
         // Si ya está logueado, redirigir al feed directamente
         window.addEventListener('load', () => {
             if (localStorage.getItem('token')) {
-                window.location.href = '/feed.html';
+                window.location.href = './feed.html';
             }
         });
 
@@ -122,7 +122,7 @@
 
                     // Redirigir al feed tras un pequeño delay para que vea el mensaje
                     setTimeout(() => {
-                        window.location.href = '/feed.html';
+                        window.location.href = './feed.html';
                     }, 3000);
 
                 } else {

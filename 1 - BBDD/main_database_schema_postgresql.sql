@@ -180,7 +180,7 @@ CREATE INDEX IF NOT EXISTS idx_follows_follower_id ON follows(follower_id);
 -- usuarios nuevos desde la aplicación.
 -- ================================================
 
-/*
+
 
 -- ================================================
 -- USUARIOS DE PRUEBA — IDs 1 al 4
@@ -281,7 +281,7 @@ INSERT INTO likes (user_id, post_id) VALUES
 -- Miguel (ID 4) da likes a posts de Lucía, Adrián y Sara
 (4, 2),  -- Like al post de Lucía sobre el gap en Flexbox
 (4, 8),  -- Like al post de Adrián sobre el DELETE sin WHERE
-(4, 9),  -- Like al post de Adrián sobre el problema N+1
+(4, 9)  -- Like al post de Adrián sobre el problema N+1
 
 
 
@@ -321,7 +321,7 @@ SELECT p.id, pr.username, LEFT(p.content, 60) AS preview
 FROM posts p
 INNER JOIN profiles pr ON p.user_id = pr.user_id
 ORDER BY p.user_id, p.id;
-*/
+
 
 
 -- ================================================

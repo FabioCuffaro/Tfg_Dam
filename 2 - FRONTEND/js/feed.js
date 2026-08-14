@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Si no hay token, redirigir al login
     const token = localStorage.getItem('token');
     if (!token) {
-        window.location.href = 'login.html';
+        window.location.href = './login.html';
         return;
     }
 
@@ -128,7 +128,7 @@ function initLogout() {
 
 function logout() {
     localStorage.clear();
-    window.location.href = 'login.html';
+    window.location.href = './login.html';
 }
 
 // ==========================================
@@ -496,7 +496,7 @@ async function handleDelete(postId) {
 // ==========================================
 
 function goToProfile(username) {
-    window.location.href = 'profile.html?user=' + username;
+    window.location.href = './profile.html?user=' + username;
 }
 
 function formatTime(dateStr) {

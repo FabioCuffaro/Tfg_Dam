@@ -276,7 +276,7 @@ PROYECTO FINAL DE GRADO/
 - **Java 17** o superior
 - **Maven 3.8+**
 - **PostgreSQL 14+** corriendo en `localhost:5432`
-- Cuenta en **Cloudinary** (gratuita)
+- La configuración de **Cloudinary** incluida en el proyecto (no es necesario crear otra cuenta para probarlo)
 
 ### 1. Clonar el repositorio
 
@@ -285,17 +285,17 @@ git clone https://github.com/FabioCuffaro/Tfg_Dam.git
 cd social-web-tfg
 ```
 
-### 2. Crear la base de datos
+### 2. Crear y preparar la base de datos
 
-```sql
-CREATE DATABASE social_tfg_db;
-```
+Abrir el archivo `1 - BBDD/main_database_schema_postgresql.sql` y seguir las
+**INSTRUCCIONES DE USO** que aparecen al principio. El propio script indica qué
+bloques deben ejecutarse en desarrollo local y cuáles corresponden a producción
+en Railway.
 
-Ejecutar el script de esquema:
-
-```bash
-psql -U postgres -d social_tfg_db -f "1 - BBDD/database_schema_postgresql.sql"
-```
+> **Importante:** en local, primero se ejecuta el bloque `CREATE DATABASE`, después
+> se selecciona la base de datos `social_tfg_db` y finalmente se ejecutan las tablas.
+> Los datos de prueba son opcionales. No ejecutes el bloque de creación de la base
+> de datos en Railway, porque Railway ya la crea automáticamente.
 
 ### 3. Configurar el backend
 
@@ -312,10 +312,16 @@ jwt.secret=tu-clave-secreta-larga-minimo-256-bits
 jwt.expiration=86400000
 
 # Cloudinary
-cloudinary.cloud-name=TU_CLOUD_NAME
-cloudinary.api-key=TU_API_KEY
-cloudinary.api-secret=TU_API_SECRET
+# Para probar el proyecto, conservar los valores que ya incluye application.properties
+cloudinary.cloud-name=VALOR_YA_CONFIGURADO
+cloudinary.api-key=VALOR_YA_CONFIGURADO
+cloudinary.api-secret=VALOR_YA_CONFIGURADO
 ```
+
+> **Cloudinary para las pruebas:** no cambies ni elimines las claves de Cloudinary
+> que ya están configuradas en `application.properties`. Se incluyen para que la
+> subida de imágenes funcione al probar el proyecto sin configurar una cuenta propia.
+> Solo debes sustituirlas si vas a desplegar tu propia instancia con otra cuenta.
 
 ### 4. Arrancar el backend
 
@@ -328,7 +334,7 @@ El servidor arranca en `http://localhost:8080`.
 
 ### 5. Abrir el frontend
 
-Sirve la carpeta `2 - FRONTEND/` con cualquier servidor estático. La opción más sencilla con VS Code es la extensión **Live Server** (clic derecho → _Open with Live Server_ sobre `feed.html`).
+Sirve la carpeta `2 - FRONTEND/` con cualquier servidor estático. La opción más sencilla con VS Code es la extensión **Live Server** (clic derecho → _Open with Live Server_ sobre `login.html`).
 
 > **Importante:** el `API_URL` en cada archivo `.js` apunta a `http://localhost:8080`. Cámbialo si despliegas el backend en otro host.
 

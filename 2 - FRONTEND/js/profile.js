@@ -35,7 +35,7 @@ let profileIsOwnProfile = false;
 document.addEventListener('DOMContentLoaded', function () {
     const token = localStorage.getItem('token');
     if (!token) {
-        window.location.href = 'login.html';
+        window.location.href = './login.html';
         return;
     }
 
@@ -515,7 +515,7 @@ function renderFollowList(container, users, type) {
  */
 function goToProfileFromModal(username) {
     document.getElementById('followListModal').style.display = 'none';
-    window.location.href = 'profile.html?user=' + username;
+    window.location.href = './profile.html?user=' + username;
 }
 
 
@@ -539,7 +539,7 @@ function initLogoutProfile() {
 
 function logoutProfile() {
     localStorage.clear();
-    window.location.href = 'login.html';
+    window.location.href = './login.html';
 }
 
 
